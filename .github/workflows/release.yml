@@ -1,0 +1,26 @@
+name: Release Swift Package
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Zip Swift Package
+        run: zip -r polkabind-swift-pkg.zip .
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: polkabind-swift-pkg.zip
+          tag_name: ${{ github.ref_name }}
