@@ -17,8 +17,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Prepare Clean Archive Directory
+        run: |
+          mkdir release-dir
+          shopt -s extglob
+          cp -r !(release-dir|.git|.github) release-dir/
+
       - name: Zip Swift Package
-        run: zip -r polkabind-swift-pkg.zip .
+        run: zip -r polkabind-swift-pkg.zip release-dir
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v1
