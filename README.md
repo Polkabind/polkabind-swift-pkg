@@ -1,34 +1,10 @@
 # Polkabind
 
-**Seamless interaction with any Polkadot SDK based chain for Swift, Kotlin, Python and more!**
-
-<p align="center">
-  ⚠️ **Work in Progress** ⚠️
-</p>
+**Seamless interaction with any Polkadot SDK based chain for Swift**
 
 ## Overview
 
-`Polkabind` is a library that opens the Polkadot ecosystem to programming languages other than Rust. It exposes mainly standard wallet-level functionality (key management, balance queries, extrinsic building, signing, RPC, event subscriptions and more) to other languages (Swift, Kotlin, Python, Javascript and more) by exposing the **[Subxt](https://github.com/paritytech/subxt)** library through FFI (foreign language interface). 
-
-## Why?
-
-As of today, the **main** and **supported** languages that can be used to interact with a chain built on the Polkadot SDK are:
-
-- *Rust*: primary and official through **Subxt**, **Polkadot SDK** and **FRAME**.
-- *Javascript/Typescript*: widely used and community supported through tools like: **PAPI** and **PolkadotJS** and more.
-
-Some projects tried to expose the same rich functionality for other languages, but many are way behind in terms of API exposure compared to Subxt. And still, it's really difficult to produce safe code in other languages compared to Rust, and especially compared to the established Rust cryptographic libraries used under the hood by Subxt and FRAME.
-
-Subxt itself is the primary Rust/Webassembly based tool used to interact with Polkadot SDK based chains, and many community developer tools use it internally. But for a developer, other than the Rust language learning curve, Subxt adds to it its own learning curve because of it's rich API coverage and the complexity of the blockchain based interactions in general.
-
-`Polkabind` tries to open the Polkadot ecosystem to other languages in a smart way by: 
-
-- creating a façade/abstraction on top of Subxt itself: we use Subxt, we don't replace it. Subxt is our source of truth. The façade exposes mainly standard wallet-level functionality, no fancy interactions, at least for now.
-- simplifying the developer experience: instead of crafting a big block of code using Subxt to do a simple transfer, Polkabind abstracts it to be a simple function exposed to other langugaes.
-- the façade is translated to other languages through FFI (C ABI), the standard bridge between Rust and most runtimes.
-- Polkabind will produce small ready-to-import libraries for major languages: Swift, Kotlin, Nodejs, Python and more. And later, those libraries will be published to each language package manager's repository: for Nodejs, it will be as simple as *npm install @polkabind/latest*. 
-- If Subxt gains a new feature, a single Rust change in Polkabind automatically propagates to every supported language.
-
+`Polkabind` is a library that opens the Polkadot ecosystem to programming languages other than Rust. It exposes mainly standard wallet-level functionality (key management, balance queries, extrinsic building, signing, RPC, event subscriptions and more) to other languages (Swift, Kotlin, Python, Javascript and more) by exposing the **[Subxt](https://github.com/paritytech/subxt)** library through FFI (foreign language interface). This is the Polkabind Swift package, for iOS/Swift developers.
 
 ## High-Level Workflow
 
@@ -82,6 +58,54 @@ flowchart TD
   class D2 release
   ```
 
+# Show me the code
+
+Here's what it looks like to use `Polkabind` in Swift:
+
+## Classic Subxt (Rust)
+
+``` rust
+// build the address, compose the dynamic call,
+// sign, submit, watch for finality …
+let dst = Value::variant(
+    "Id",
+    Composite::unnamed(vec![Value::from_bytes(arr)]),
+);
+let client = OnlineClient::<PolkadotConfig>::from_url(url).await?;
+let tx = dynamic_call(
+    "Balances",
+    "transfer_allow_death",
+    vec![dst, Value::u128(amount)],
+);
+client
+    .tx()
+    .sign_and_submit_then_watch_default(&tx, &signer)
+    .await?
+    .wait_for_finalized_success()
+    .await?;
+```
+
+## Polkabind (Swift)
+```swift
+// one blocking FFI call – done 🎉
+try Polkabind.doTransfer(destHex: destHex, amount: amt)
+```
+
+Behind the scenes **Polkabind** executes that same Rust (left column) but
+exposes a single, ergonomic Swift API.
+
 ## Status
 
 This is a *work-in-progress*, please visit [polkabind.dev](https://polkabind.dev) for a summary of the expected roadmap.
+
+## License
+
+Polkabind is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+### Third-Party Licenses and Attributions
+
+Polkabind uses Subxt, which is dual-licensed under either:
+    • Apache License, Version 2.0, or
+    • GNU General Public License v3.0 (or later)
+
+Polkabind explicitly elects to use Subxt under the terms of the Apache License, Version 2.0.
